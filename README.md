@@ -31,7 +31,7 @@ Pactum uses GenLayer's Optimistic Democracy consensus to make those judgments tr
 ## Contract Address (Testnet Bradbury)
 
 ```
-0x9B37F920bb89ae0144598578c7B88C6dBBb086BB
+0x3abebBbFA10B6bc4c180d05419923EA493481c57
 ```
 
 ## Contract Methods
