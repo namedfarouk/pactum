@@ -1,108 +1,108 @@
-# Sample GenLayer project
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/license/mit/)
-[![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?logo=discord&logoColor=white)](https://discord.gg/8Jm4v89VAu)
-[![Telegram](https://img.shields.io/badge/Telegram--T.svg?style=social&logo=telegram)](https://t.me/genlayer)
-[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/yeagerai.svg?style=social&label=Follow%20%40GenLayer)](https://x.com/GenLayer)
-[![GitHub star chart](https://img.shields.io/github/stars/yeagerai/genlayer-project-boilerplate?style=social)](https://star-history.com/#yeagerai/genlayer-js)
+# Pactum
 
-## 👀 About
-This project includes the boilerplate code for a GenLayer use case implementation, specifically a football bets game.
+**Trustless service agreements for the agentic economy.**
 
-## 📦 What's included
-- Basic requirements to deploy and test your intelligent contracts locally
-- Configuration file template
-<!-- - Test functions to write complete end-to-end tests -->
-- An example of an intelligent contract (Football Bets)
-- Example end-to-end tests for the contract provided
-- A production-ready Next.js 15 frontend with TypeScript, TanStack Query, and Radix UI
+Pactum is an intelligent contract protocol on GenLayer that enables AI agents and humans to form binding service agreements, lock funds in escrow, and have deliverables evaluated by AI consensus.
 
-## 🛠️ Requirements
-- A running GenLayer Studio (Install from [Docs](https://docs.genlayer.com/developers/intelligent-contracts/tooling-setup#using-the-genlayer-studio) or work with the hosted version of [GenLayer Studio](https://studio.genlayer.com/)). If you are working locally, this repository code does not need to be located in the same directory as the Genlayer Studio.
-- [GenLayer CLI](https://github.com/genlayerlabs/genlayer-cli) globally installed. To install or update the GenLayer CLI run `npm install -g genlayer`
+## The Problem
 
-## 🚀 Steps to run this example
+As AI agents begin transacting autonomously, they need enforceable agreements. Traditional smart contracts can't evaluate subjective deliverables like "was this data clean?" or "does this report answer the question?" There's no onchain way to judge whether work was actually done well.
 
-### 1. Deploy the contract
-   Deploy the contract from `/contracts/football_bets.py` using the GenLayer CLI:
-   1. Choose the network that you want to use (studionet, localnet, or tesnet-*): `genlayer network`
-   2. Execute the deploy command `genlayer deploy`. This command is going to execute the deploy script located in `/deploy/deployScript.ts`
+## The Solution
 
-### 2. Setup the frontend environment
-  1. All the content of the dApp is located in the `/frontend` folder.
-  2. Copy the `.env.example` file in the `frontend` folder and rename it to `.env`, then fill in the values for your configuration. The provided NEXT_PUBLIC_GENLAYER_RPC_URL value is the backend of the hosted GenLayer Studio.
-  3. Add the deployed contract address to the `/frontend/.env` under the variable `NEXT_PUBLIC_CONTRACT_ADDRESS`
+Pactum uses GenLayer's Optimistic Democracy consensus to make those judgments trustlessly. When a deliverable is submitted, validators running diverse LLMs independently fetch the work, evaluate it against the agreed terms, and reach consensus on whether it was fulfilled.
 
-### 4. Run the frontend Next.js app
-   Execute the following commands in your terminal:
+## How It Works
 
-   **Using bun:**
-   ```shell
-   cd frontend
-   bun install
-   bun dev
-   ```
+1. **Create a Pact** — A client defines the work terms in natural language, sets a deadline, and specifies the payment amount.
+2. **Submit Deliverable** — The provider completes the work and submits a URL pointing to the deliverable.
+3. **AI Evaluation** — Either party triggers evaluation. Validators fetch the deliverable, reason about whether it meets the terms, and vote on the outcome.
+4. **Resolution** — If consensus determines the work was fulfilled, funds release to the provider. If not, funds return to the client. Reputation updates either way.
 
-   **Using npm:**
-   ```shell
-   cd frontend
-   npm install
-   npm run dev
-   ```
+## Tech Stack
 
-   The terminal should display a link to access your frontend app (usually at <http://localhost:3000/>).
-   For more information on the code see [GenLayerJS](https://github.com/yeagerai/genlayer-js).
-   
-### 5. Test contracts
-1. Install the Python packages listed in the `requirements.txt` file in a virtual environment.
-2. Make sure your GenLayer Studio is running. Then execute the following command in your terminal:
-   ```shell
-   gltest
-   ```
+- **Intelligent Contract**: Python (GenVM SDK)
+- **Consensus**: Optimistic Democracy with custom validator functions
+- **AI Evaluation**: LLM-powered deliverable assessment with web fetching
+- **Frontend**: React + TypeScript + Tailwind CSS
+- **SDK**: GenLayer JS
+- **Deployment**: Testnet Bradbury
 
-## ⚽ How the Football Bets Contract Works
+## Contract Address (Testnet Bradbury)
 
-The Football Bets contract allows users to create bets for football matches, resolve those bets, and earn points for correct bets. Here's a breakdown of its main functionalities:
+```
+0x9B37F920bb89ae0144598578c7B88C6dBBb086BB
+```
 
-1. Creating Bets:
-   - Users can create a bet for a specific football match by providing the game date, team names, and their predicted winner.
-   - The contract checks if the game has already finished and if the user has already made a bet for this match.
+## Contract Methods
 
-2. Resolving Bets:
-   - After a match has concluded, users can resolve their bets.
-   - The contract fetches the actual match result from a specified URL.
-   - If the Bet was correct, the user earns a point.
+### Write Methods
+- `create_pact(provider, terms, deadline_timestamp, amount)` — Create a new service agreement
+- `submit_deliverable(pact_id, deliverable_url, note)` — Provider submits completed work
+- `approve_deliverable(pact_id)` — Client manually approves without AI evaluation
+- `evaluate_deliverable(pact_id)` — Trigger AI consensus evaluation of the deliverable
+- `cancel_pact(pact_id)` — Client cancels before provider submits
+- `claim_expired(pact_id)` — Claim refund after deadline passes
 
-3. Querying Data:
-   - Users can retrieve all bets.
-   - The contract also allows querying of points, either for all players or for a specific player.
+### Read Methods
+- `get_pact(pact_id)` — Get full pact details
+- `get_all_pacts()` — List all pacts
+- `get_active_pacts()` — List active pacts
+- `get_pact_count()` — Total number of pacts
+- `get_reputation(agent)` — Get agent's track record
 
-4. Getting Points:
-   - Points are awarded for correct bets.
-   - Users can check their total points or the points of any player.
+## AI Evaluation Details
 
-## 🧪 Tests
+The `evaluate_deliverable` method uses `gl.vm.run_nondet_unsafe` with a custom validator function:
 
-This project includes integration tests that interact with the contract deployed in the Studio. These tests cover the main functionalities of the Football Bets contract:
+- **Leader** fetches the deliverable URL, prompts an LLM to judge fulfillment, returns `{fulfilled, score, reasoning}`
+- **Validators** independently repeat the evaluation
+- **Consensus rule**: Must agree on the `fulfilled` boolean; scores must be within ±2
 
-1. Creating a bet
-2. Resolving a bet
-3. Querying bets for a player
-4. Querying points for a player
+This ensures fair, decentralized judgment even when different validators run different LLMs.
 
-The tests simulate real-world interactions with the contract, ensuring that it behaves correctly under various scenarios. They use the GenLayer Studio to deploy and interact with the contract, providing a comprehensive check of the contract's functionality in a controlled environment.
+## Setup
 
-To run the tests, use the `gltest` command as mentioned in the "Steps to run this example" section.
+### Prerequisites
+- Python 3.12+
+- Node.js 18+
+- GenLayer CLI (`npm install -g genlayer`)
 
+### Install & Lint
+```bash
+python3.12 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+genvm-lint check contracts/pactum.py
+```
 
-## 💬 Community
-Connect with the GenLayer community to discuss, collaborate, and share insights:
-- **[Discord Channel](https://discord.gg/8Jm4v89VAu)**: Our primary hub for discussions, support, and announcements.
-- **[Telegram Group](https://t.me/genlayer)**: For more informal chats and quick updates.
+### Deploy
+```bash
+genlayer network set testnet-bradbury
+genlayer deploy --contract contracts/pactum.py
+```
 
-Your continuous feedback drives better product development. Please engage with us regularly to test, discuss, and improve GenLayer.
+### Interact
+```bash
+# Read pact count
+genlayer call <CONTRACT_ADDRESS> get_pact_count
 
-## 📖 Documentation
-For detailed information on how to use GenLayerJS SDK, please refer to our [documentation](https://docs.genlayer.com/).
+# Create a pact
+genlayer write <CONTRACT_ADDRESS> create_pact --args <PROVIDER_ADDRESS> "Build a website" 1743800000 1000
+```
 
-## 📜 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Track
+
+**Agentic Economy Infrastructure** — GenLayer Bradbury Builders Hackathon
+
+## Why Pactum?
+
+GenLayer positions itself as "a legal system for machines." Pactum is exactly that: enforceable service agreements where AI validators act as the judiciary. Every pact resolution generates transaction fees, and under GenLayer's dev fee model, 10-20% of those fees go to the contract creator permanently.
+
+## Built By
+
+**FK** ([@NamedFarouk](https://x.com/NamedFarouk)) — Web3 builder and open source contributor focused on the AI x blockchain intersection.
+
+## License
+
+MIT
