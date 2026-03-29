@@ -1,0 +1,11 @@
+{
+  "name": "pactum",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "deploy": "genlayer deploy"
+  },
+  "devDependencies": {
+    "genlayer-js": "^0.18.3"
+  }
+}
