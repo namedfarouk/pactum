@@ -101,7 +101,8 @@ class Pactum(gl.Contract):
 
         pact.status = "approved"
 
-        # TODO: Transfer funds to provider when escrow is re-enabled
+        # TODO: Re-enable escrow transfer when SDK supports payable
+        # gl.ContractAt(pact.provider).emit_transfer(value=pact.amount)
         rep = self.reputation.get_or_insert_default(pact.provider)
         rep.completed += u256(1)
         rep.total_earned += pact.amount
@@ -176,13 +177,15 @@ This result should be perfectly parsable by a JSON parser without errors.
 
         if fulfilled:
             pact.status = "resolved"
-            # TODO: Transfer funds to provider when escrow is re-enabled
+            # TODO: Re-enable escrow transfer when SDK supports payable
+            # gl.ContractAt(pact.provider).emit_transfer(value=pact.amount)
             rep = self.reputation.get_or_insert_default(pact.provider)
             rep.completed += u256(1)
             rep.total_earned += pact.amount
         else:
             pact.status = "resolved"
-            # TODO: Return funds to client when escrow is re-enabled
+            # TODO: Re-enable escrow refund when SDK supports payable
+            # gl.ContractAt(pact.client).emit_transfer(value=pact.amount)
             rep = self.reputation.get_or_insert_default(pact.provider)
             rep.failed += u256(1)
 
@@ -200,7 +203,8 @@ This result should be perfectly parsable by a JSON parser without errors.
             raise gl.vm.UserError("Can only cancel active pacts (before submission)")
 
         pact.status = "expired"
-        # TODO: Return funds to client when escrow is re-enabled
+        # TODO: Re-enable escrow refund when SDK supports payable
+        # gl.ContractAt(pact.client).emit_transfer(value=pact.amount)
 
     @gl.public.write
     def claim_expired(self, pact_id: int) -> None:
@@ -219,7 +223,8 @@ This result should be perfectly parsable by a JSON parser without errors.
         # For now, this method is callable and the caller asserts the deadline has passed
 
         pact.status = "expired"
-        # TODO: Return funds to client when escrow is re-enabled
+        # TODO: Re-enable escrow refund when SDK supports payable
+        # gl.ContractAt(pact.client).emit_transfer(value=pact.amount)
 
         rep = self.reputation.get_or_insert_default(pact.provider)
         rep.failed += u256(1)
